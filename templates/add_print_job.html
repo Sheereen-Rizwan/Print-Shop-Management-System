@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block page_title %}Add Print Job{% endblock %}
+{% block page_subtitle %}Individual student or whole batch/stream group{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width: 520px;">
+    <form method="POST">
+        <div class="ps-form-group">
+            <label>Job for *</label>
+            <select name="target_type" class="ps-select" id="targetType" onchange="toggleTarget()" required>
+                <option value="student">Individual Student</option>
+                <option value="group">Whole Batch/Stream Group</option>
+            </select>
+        </div>
+
+        <div class="ps-form-group" id="studentField">
+            <label>Student *</label>
+            <input type="text" id="studentSearch" class="ps-input" placeholder="Type to search by name..."
+                   autocomplete="off" style="margin-bottom:8px;">
+            <select name="student_id" id="studentSelect" class="ps-select" size="1" required>
+                <option value="">-- Select student --</option>
+                {% for s in students %}
+                <option value="{{ s.student_id }}" data-name="{{ s.name|lower }}">
+                    {{ s.name }} — {{ s.batch_name }} ({{ s.stream_name }})
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="ps-form-group" id="groupField" style="display:none;">
+            <label>Batch & Stream Group *</label>
+            <select name="subject_group_id" class="ps-select">
+                <option value="">-- Select group --</option>
+                {% for sg in subject_groups %}
+                <option value="{{ sg.subject_group_id }}">
+                    {{ sg.batch_name }} — {{ sg.stream_name }}
+                    {% if sg.group_name != 'General' %} ({{ sg.group_name }}){% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="ps-form-group">
+            <label>File Name *</label>
+            <input type="text" name="file_name" class="ps-input" required>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="ps-form-group">
+                <label>Pages *</label>
+                <input type="number" min="1" name="pages" class="ps-input" required>
+            </div>
+            <div class="ps-form-group">
+                <label>Copies</label>
+                <input type="number" min="1" name="copies" class="ps-input" value="1">
+            </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="ps-form-group">
+                <label>Paper Size</label>
+                <select name="paper_size" class="ps-select">
+                    <option value="A4">A4</option>
+                    <option value="A3">A3</option>
+                </select>
+            </div>
+            <div class="ps-form-group">
+                <label>Print Type</label>
+                <select name="print_type" class="ps-select">
+                    <option value="bw">Black & White</option>
+                    <option value="color">Color</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="ps-form-group" style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" name="binding" id="binding" style="width:18px; height:18px;">
+            <label for="binding" style="margin:0;">Add Binding</label>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-block">Add Job</button>
+    </form>
+</div>
+
+<script>
+function toggleTarget() {
+    const type = document.getElementById('targetType').value;
+    document.getElementById('studentField').style.display = (type === 'student') ? 'block' : 'none';
+    document.getElementById('groupField').style.display = (type === 'group') ? 'block' : 'none';
+}
+
+document.getElementById('studentSearch').addEventListener('input', function() {
+    const term = this.value.toLowerCase();
+    const select = document.getElementById('studentSelect');
+    const options = select.options;
+    for (let i = 0; i < options.length; i++) {
+        const name = options[i].getAttribute('data-name') || '';
+        options[i].hidden = term && !name.includes(term);
+    }
+});
+
+document.getElementById('studentSearch').addEventListener('focus', function() {
+    document.getElementById('studentSelect').size = 6;
+});
+
+document.getElementById('studentSelect').addEventListener('change', function() {
+    document.getElementById('studentSearch').value = this.options[this.selectedIndex].text;
+    this.size = 1;
+});
+
+document.addEventListener('click', function(e) {
+    const field = document.getElementById('studentField');
+    if (!field.contains(e.target)) {
+        document.getElementById('studentSelect').size = 1;
+    }
+});
+</script>
+{% endblock %}

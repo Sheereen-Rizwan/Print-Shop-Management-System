@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Welcome back! Here's what's happening today.{% endblock %}
+
+{% block content %}
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-icon mint">🎓</div>
+        <div>
+            <div class="stat-label">Total Students</div>
+            <div class="stat-value">{{ stats.total_students }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon peach">💰</div>
+        <div>
+            <div class="stat-label">Pending Balance</div>
+            <div class="stat-value">Rs. {{ "%.0f"|format(stats.total_pending) }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon blue">🧾</div>
+        <div>
+            <div class="stat-label">Charges Today</div>
+            <div class="stat-value">Rs. {{ "%.0f"|format(stats.charges_today) }}</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon lav">💳</div>
+        <div>
+            <div class="stat-label">Payments Today</div>
+            <div class="stat-value">Rs. {{ "%.0f"|format(stats.payments_today) }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Print Jobs — big table -->
+<div class="panel">
+    <div class="panel-header">
+        <h2>Recent Print Jobs</h2>
+        <a href="/print-jobs" class="view-all">View All</a>
+    </div>
+    <table class="ps-table">
+        <thead>
+            <tr><th>File</th><th>For</th><th>Pages</th><th>Type</th><th>Copies</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            {% for j in recent_jobs %}
+            <tr>
+                <td>{{ j.file_name }}</td>
+                <td>
+                    {% if j.student_name %}{{ j.student_name }}{% else %}{{ j.batch_name }} — {{ j.stream_name }} ({{ j.group_name }}){% endif %}
+                </td>
+                <td>{{ j.pages }}</td>
+                <td>{{ j.paper_size }} / {{ j.print_type }}</td>
+                <td>{{ j.copies }}</td>
+                <td>
+                    <span class="badge-pill {{ 'badge-done' if j.status == 'done' else 'badge-pending' }}">
+                        {{ 'Completed' if j.status == 'done' else 'Pending' }}
+                    </span>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6"><div class="empty-state">No print jobs yet.</div></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Two smaller tables side by side -->
+<div style="display:grid; grid-template-columns: 1fr 1.4fr; gap:16px;">
+
+    <div class="panel">
+        <div class="panel-header"><h3>Top Dues</h3></div>
+        <table class="ps-table">
+            <thead><tr><th>#</th><th>Name</th><th style="text-align:right;">Balance</th></tr></thead>
+            <tbody>
+                {% for d in top_debtors %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><a href="/students/{{ d.student_id }}">{{ d.name }}</a></td>
+                    <td style="text-align:right;" class="balance-due">Rs. {{ "%.0f"|format(d.balance) }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3"><div class="empty-state">No outstanding dues 🎉</div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="panel">
+        <div class="panel-header"><h3>Batch Summary</h3></div>
+        <table class="ps-table">
+            <thead><tr><th>Batch</th><th>Students</th><th style="text-align:right;">Pending Balance</th></tr></thead>
+            <tbody>
+                {% for b in batch_summary %}
+                <tr>
+                    <td>{{ b.batch_name }} — {{ b.stream_name }}{% if b.group_name != 'General' %} ({{ b.group_name }}){% endif %}</td>
+                    <td>{{ b.student_count }}</td>
+                    <td style="text-align:right;" class="{{ 'balance-due' if b.pending_balance > 0 else 'balance-zero' }}">
+                        Rs. {{ "%.0f"|format(b.pending_balance) }}
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="3"><div class="empty-state">No batches yet.</div></td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

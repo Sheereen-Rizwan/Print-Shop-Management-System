@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block page_title %}Add Student{% endblock %}
+{% block page_subtitle %}Create a new student record{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width: 480px;">
+    <form method="POST">
+        <div class="ps-form-group">
+            <label>Full Name *</label>
+            <input type="text" name="name" class="ps-input" required>
+        </div>
+        <div class="ps-form-group">
+            <label>Phone (optional)</label>
+            <input type="text" name="phone" class="ps-input">
+        </div>
+        <div class="ps-form-group">
+            <label>Index Number (optional)</label>
+            <input type="text" name="index_number" class="ps-input">
+        </div>
+        <div class="ps-form-group">
+            <label>Batch, Stream & Subject Group *</label>
+            <select name="subject_group_id" class="ps-select" required>
+                <option value="">-- Select --</option>
+                {% for sg in subject_groups %}
+                <option value="{{ sg.subject_group_id }}">
+                    {{ sg.batch_name }} — {{ sg.stream_name }}
+                    {% if sg.group_name != 'General' %} ({{ sg.group_name }}){% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Add Student</button>
+        <a href="/students" class="btn btn-secondary btn-block" style="margin-top:8px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

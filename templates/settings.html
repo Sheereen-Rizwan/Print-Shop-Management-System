@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block page_title %}Settings{% endblock %}
+{% block page_subtitle %}System preferences{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width: 480px;">
+    <form method="POST" action="/settings/update">
+        <div class="ps-form-group" style="display:flex; align-items:center; gap:10px;">
+            <input type="checkbox" name="auto_charge_print_jobs" id="autoCharge"
+                   {{ 'checked' if auto_charge == 'on' else '' }} style="width:18px; height:18px;">
+            <label for="autoCharge" style="margin:0;">Auto-charge students when a print job is marked done</label>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save Settings</button>
+    </form>
+</div>
+{% endblock %}

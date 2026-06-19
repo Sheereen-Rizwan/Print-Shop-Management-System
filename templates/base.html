@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Print Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="icon-badge">🖨️</div>
+            <div>
+                Print Shop
+                <small>Management System</small>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/" class="{{ 'active' if request.path == '/' }}">
+                <span class="nav-icon">🏠</span> Dashboard
+            </a>
+            <a href="/students" class="{{ 'active' if request.path.startswith('/students') }}">
+                <span class="nav-icon">🎓</span> Students
+            </a>
+            <a href="/print-jobs" class="{{ 'active' if request.path.startswith('/print-jobs') }}">
+                <span class="nav-icon">🖨️</span> Print Jobs
+            </a>
+            <a href="/transactions" class="{{ 'active' if request.path == '/transactions' }}">
+                <span class="nav-icon">📒</span> Transactions
+            </a>
+            <a href="/batch-charge" class="{{ 'active' if request.path == '/batch-charge' }}">
+                <span class="nav-icon">🧾</span> Batch Charge
+            </a>
+            <a href="/prices" class="{{ 'active' if request.path == '/prices' }}">
+                <span class="nav-icon">💲</span> Prices
+            </a>
+            <a href="/settings" class="{{ 'active' if request.path == '/settings' }}">
+                <span class="nav-icon">⚙️</span> Settings
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <span>🖥️</span>
+            <div>
+                <div style="font-weight:600;">Print Shop</div>
+                <div style="color:#9FC9C4;"><span class="dot"></span>Online</div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-content">
+        <div class="topbar">
+            <div>
+                <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                <div class="subtitle">{% block page_subtitle %}Welcome back! Here's what's happening today.{% endblock %}</div>
+            </div>
+            <form class="search-form" method="GET" action="/search">
+                <span>🔍</span>
+                <input type="text" name="q" placeholder="Search student, index no...">
+            </form>
+        </div>
+
+        <div class="page-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else ('warning' if category == 'warning' else ('info' if category == 'info' else 'danger')) }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

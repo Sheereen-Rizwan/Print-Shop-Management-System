@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block page_title %}Search Results{% endblock %}
+{% block page_subtitle %}"{{ q }}"{% endblock %}
+
+{% block content %}
+<div class="panel">
+    <table class="ps-table">
+        <thead>
+            <tr><th>Index No.</th><th>Name</th><th>Batch</th><th>Stream</th><th>Phone</th><th style="text-align:right;">Balance</th></tr>
+        </thead>
+        <tbody>
+            {% for s in results %}
+            <tr>
+                <td>{{ s.index_number or '—' }}</td>
+                <td><a href="/students/{{ s.student_id }}">{{ s.name }}</a></td>
+                <td>{{ s.batch_name }}</td>
+                <td>{{ s.stream_name }}{% if s.group_name != 'General' %} ({{ s.group_name }}){% endif %}</td>
+                <td>{{ s.phone or '—' }}</td>
+                <td style="text-align:right;" class="{{ 'balance-due' if s.balance > 0 else 'balance-zero' }}">
+                    Rs. {{ "%.2f"|format(s.balance) }}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="6"><div class="empty-state">No students found matching "{{ q }}".</div></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

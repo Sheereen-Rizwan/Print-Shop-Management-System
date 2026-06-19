@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block page_title %}Record Payment{% endblock %}
+{% block page_subtitle %}{{ student.name }}{% endblock %}
+
+{% block content %}
+<div class="alert alert-info" style="max-width:480px;">
+    Current balance: <strong>Rs. {{ "%.2f"|format(student.balance) }}</strong>
+</div>
+
+<div class="panel" style="max-width: 480px;">
+    <form method="POST">
+        <div class="ps-form-group">
+            <label>Amount Paid (Rs.) *</label>
+            <input type="number" step="0.01" min="0.01" name="amount" class="ps-input" required>
+        </div>
+        <div class="ps-form-group">
+            <label>Note (optional)</label>
+            <input type="text" name="description" class="ps-input" placeholder="Cash payment">
+        </div>
+        <button type="submit" class="btn btn-success btn-block">Record Payment</button>
+        <a href="/students/{{ student.student_id }}" class="btn btn-secondary btn-block" style="margin-top:8px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

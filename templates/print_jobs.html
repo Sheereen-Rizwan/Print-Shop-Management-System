@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block page_title %}Print Jobs{% endblock %}
+{% block page_subtitle %}Pending and completed jobs{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+    <a href="/print-jobs/add" class="btn btn-primary">+ Add Print Job</a>
+</div>
+
+<div class="panel">
+    <div class="panel-header"><h2>Pending</h2></div>
+    <table class="ps-table">
+        <thead>
+            <tr>
+                <th>File</th><th>For</th><th>Pages</th><th>Type</th><th>Binding</th><th>Created</th><th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for j in pending %}
+            <tr>
+                <td>{{ j.file_name }}</td>
+                <td>
+                    {% if j.student_name %}
+                        <a href="/students/{{ j.student_id }}">{{ j.student_name }}</a>
+                        <br><small style="color:var(--text-muted);">{{ j.batch_name }} ({{ j.stream_name }})</small>
+                    {% else %}
+                        {{ j.batch_name }} — {{ j.stream_name }} ({{ j.group_name }})
+                    {% endif %}
+                </td>
+                <td>{{ j.pages }} x{{ j.copies }}</td>
+                <td>{{ j.paper_size }} / {{ j.print_type }}</td>
+                <td>{{ 'Yes' if j.binding else 'No' }}</td>
+                <td>{{ j.created_at[:16] }}</td>
+                <td>
+                    <form method="POST" action="/print-jobs/{{ j.job_id }}/done" style="display:inline;">
+                        <button type="submit" class="btn btn-success btn-sm">Mark Done</button>
+                    </form>
+                    <form method="POST" action="/print-jobs/{{ j.job_id }}/delete" style="display:inline;"
+                        onsubmit="return confirm('Delete this print job?');">
+                        <button type="submit" class="btn btn-secondary btn-sm" style="color:var(--red);">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7"><div class="empty-state">No pending jobs 🎉</div></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <div class="panel-header"><h2>Recently Completed</h2></div>
+    <table class="ps-table">
+        <thead>
+            <tr><th>File</th><th>For</th><th>Batch</th><th>Pages</th><th>Completed</th></tr>
+        </thead>
+        <tbody>
+            {% for j in done %}
+            <tr>
+                <td>{{ j.file_name }}</td>
+                <td>{% if j.student_name %}{{ j.student_name }}{% else %}{{ j.group_name }}{% endif %}</td>
+                <td>{{ j.batch_name }} ({{ j.stream_name }})</td>
+                <td>{{ j.pages }} x{{ j.copies }}</td>
+                <td>{{ j.created_at[:16] }}</td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5"><div class="empty-state">No completed jobs yet.</div></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block page_title %}Students{% endblock %}
+{% block page_subtitle %}Browse students by batch and stream{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:flex-end; margin-bottom:16px;">
+    <a href="/students/add" class="btn btn-primary">+ Add Student</a>
+</div>
+
+<div class="group-grid">
+    {% for g in groups %}
+    <a href="/students/group/{{ g.subject_group_id }}" class="group-card">
+        <div class="gc-title">{{ g.batch_name }}</div>
+        <div class="gc-sub">
+            {{ g.stream_name }}{% if g.group_name != 'General' %} — {{ g.group_name }}{% endif %}
+        </div>
+        <span class="gc-count">{{ g.student_count }} student{{ 's' if g.student_count != 1 else '' }}</span>
+    </a>
+    {% else %}
+    <div class="empty-state">No batch/stream groups found.</div>
+    {% endfor %}
+</div>
+
+{% endblock %}

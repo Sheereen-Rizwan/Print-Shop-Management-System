@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block page_title %}{{ group_info.batch_name }}{% endblock %}
+{% block page_subtitle %}
+    {{ group_info.stream_name }}{% if group_info.group_name != 'General' %} — {{ group_info.group_name }}{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+    <a href="/students" class="btn btn-secondary">← All Groups</a>
+    <a href="/students/add" class="btn btn-primary">+ Add Student</a>
+</div>
+
+<div class="panel">
+    <table class="ps-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Index No.</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th style="text-align:right;">Balance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in students %}
+            <tr>
+                <td>{{ s.student_id }}</td>
+                <td>{{ s.index_number or '—' }}</td>
+                <td><a href="/students/{{ s.student_id }}">{{ s.name }}</a></td>
+                <td>{{ s.phone or '—' }}</td>
+                <td style="text-align:right;" class="{{ 'balance-due' if s.balance > 0 else 'balance-zero' }}">
+                    Rs. {{ "%.2f"|format(s.balance) }}
+                </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="5"><div class="empty-state">No students in this group yet.</div></td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

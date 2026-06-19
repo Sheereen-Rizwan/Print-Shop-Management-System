@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block page_title %}Edit Student{% endblock %}
+{% block page_subtitle %}{{ student.name }}{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width: 480px;">
+    <form method="POST">
+        <div class="ps-form-group">
+            <label>Full Name *</label>
+            <input type="text" name="name" class="ps-input" value="{{ student.name }}" required>
+        </div>
+        <div class="ps-form-group">
+            <label>Phone (optional)</label>
+            <input type="text" name="phone" class="ps-input" value="{{ student.phone or '' }}">
+        </div>
+        <div class="ps-form-group">
+            <label>Index Number (optional)</label>
+            <input type="text" name="index_number" class="ps-input" value="{{ student.index_number or '' }}">
+        </div>
+        <div class="ps-form-group">
+            <label>Batch, Stream & Subject Group *</label>
+            <select name="subject_group_id" class="ps-select" required>
+                {% for sg in subject_groups %}
+                <option value="{{ sg.subject_group_id }}"
+                    {{ 'selected' if sg.subject_group_id == student.subject_group_id else '' }}>
+                    {{ sg.batch_name }} — {{ sg.stream_name }}
+                    {% if sg.group_name != 'General' %} ({{ sg.group_name }}){% endif %}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+        <a href="/students/{{ student.student_id }}" class="btn btn-secondary btn-block" style="margin-top:8px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

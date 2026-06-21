@@ -111,7 +111,7 @@ def dashboard():
 
     batch_summary = query("""
         SELECT b.batch_name, st.stream_name, sg.group_name,
-               COUNT(s.student_id) AS student_count,
+               COUNT(DISTINCT s.student_id) AS student_count,
                COALESCE(SUM(t.amount), 0) AS pending_balance
         FROM subject_groups sg
         JOIN batch_streams bs ON bs.batch_stream_id = sg.batch_stream_id

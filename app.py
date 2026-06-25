@@ -1,3 +1,10 @@
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from flask import send_file
+import io
 from flask import Flask, render_template, request, redirect, url_for, flash, g
 import sqlite3
 
@@ -525,6 +532,108 @@ def delete_print_job(job_id):
     execute("DELETE FROM print_jobs WHERE job_id = ?", (job_id,))
     flash("Print job deleted.", "info")
     return redirect(url_for('print_jobs'))
+
+@app.route('/students/<int:sid>/statement', methods=['GET', 'POST'])
+def student_statement(sid):
+    student = query("""
+        SELECT s.*, b.batch_name, st.stream_name
+        FROM students s
+        JOIN batch_streams bs ON bs.batch_stream_id = s.batch_stream_id
+        JOIN batches b        ON b.batch_id = bs.batch_id
+        JOIN streams st       ON st.stream_id = bs.stream_id
+        WHERE s.student_id = ?
+    """, (sid,), one=True)
+
+    if request.method == 'POST':
+        start_date = request.form['start_date']
+        end_date   = request.form['end_date']
+
+        txns = query("""
+            SELECT * FROM transactions
+            WHERE student_id = ?
+              AND DATE(created_at) BETWEEN DATE(?) AND DATE(?)
+            ORDER BY created_at
+        """, (sid, start_date, end_date))
+
+        opening_balance = query("""
+            SELECT COALESCE(SUM(amount), 0) AS bal
+            FROM transactions
+            WHERE student_id = ? AND DATE(created_at) < DATE(?)
+        """, (sid, start_date), one=True)['bal']
+
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4,
+                                 topMargin=20*mm, bottomMargin=20*mm,
+                                 leftMargin=20*mm, rightMargin=20*mm)
+        styles = getSampleStyleSheet()
+        story = []
+
+        # Header
+        title_style = ParagraphStyle('Title', parent=styles['Title'], fontSize=18, spaceAfter=2)
+        story.append(Paragraph("Print Shop", title_style))
+        story.append(Paragraph("Account Statement", styles['Heading3']))
+        story.append(Spacer(1, 10))
+
+        # Student info
+        info_data = [
+            ["Student:", student['name']],
+            ["Batch / Stream:", f"{student['batch_name']} — {student['stream_name']}"],
+            ["Index No.:", student['index_number'] or "—"],
+            ["Statement Period:", f"{start_date} to {end_date}"],
+        ]
+        info_table = Table(info_data, colWidths=[110, 300])
+        info_table.setStyle(TableStyle([
+            ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('BOTTOMPADDING', (0,0), (-1,-1), 4),
+        ]))
+        story.append(info_table)
+        story.append(Spacer(1, 16))
+
+        # Transaction table
+        rows = [["Date", "Description", "Type", "Amount (Rs.)"]]
+        running_balance = opening_balance
+        rows.append(["", "Opening Balance", "", f"{opening_balance:.2f}"])
+
+        for t in txns:
+            running_balance += t['amount']
+            rows.append([
+                t['created_at'][:10],
+                t['description'],
+                t['type'].capitalize(),
+                f"{t['amount']:.2f}"
+            ])
+
+        rows.append(["", "", "Closing Balance", f"{running_balance:.2f}"])
+
+        txn_table = Table(rows, colWidths=[70, 200, 70, 90])
+        txn_table.setStyle(TableStyle([
+            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#0E3B3E')),
+            ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+            ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+            ('FONTSIZE', (0,0), (-1,-1), 9),
+            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#E7EAEC')),
+            ('ALIGN', (3,0), (3,-1), 'RIGHT'),
+            ('BACKGROUND', (0,1), (-1,1), colors.HexColor('#F5F7F8')),
+            ('FONTNAME', (0,1), (-1,1), 'Helvetica-Oblique'),
+            ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor('#E3F3F0')),
+            ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
+            ('SPAN', (0,-1), (2,-1)),
+        ]))
+        story.append(txn_table)
+        story.append(Spacer(1, 20))
+
+        footer_style = ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8,
+                                       textColor=colors.HexColor('#9AA3AB'))
+        story.append(Paragraph("This is a computer-generated statement.", footer_style))
+
+        doc.build(story)
+        buffer.seek(0)
+
+        filename = f"statement_{student['name'].replace(' ', '_')}_{start_date}_to_{end_date}.pdf"
+        return send_file(buffer, as_attachment=True, download_name=filename, mimetype='application/pdf')
+
+    return render_template('statement_form.html', student=student)
 
 if __name__ == '__main__':
     app.run(debug=True)

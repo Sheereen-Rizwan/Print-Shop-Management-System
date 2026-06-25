@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block page_title %}Generate Statement{% endblock %}
+{% block page_subtitle %}{{ student.name }}{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width: 480px;">
+    <form method="POST">
+        <div class="ps-form-group">
+            <label>From Date *</label>
+            <input type="date" name="start_date" class="ps-input" required>
+        </div>
+        <div class="ps-form-group">
+            <label>To Date *</label>
+            <input type="date" name="end_date" class="ps-input" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Download PDF Statement</button>
+        <a href="/students/{{ student.student_id }}" class="btn btn-secondary btn-block" style="margin-top:8px;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

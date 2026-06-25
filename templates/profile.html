@@ -24,6 +24,7 @@
     <a href="/students/{{ student.student_id }}/charge" class="btn btn-danger">+ Add Charge</a>
     <a href="/students/{{ student.student_id }}/payment" class="btn btn-success">+ Record Payment</a>
     <a href="/students/{{ student.student_id }}/edit" class="btn btn-outline">Edit</a>
+    <a href="/students/{{ student.student_id }}/statement" class="btn btn-secondary">📄 Statement (PDF)</a>
     <form method="POST" action="/students/{{ student.student_id }}/delete" style="margin-left:auto;"
           onsubmit="return confirm('Delete {{ student.name }}? This will also delete all their transactions. This cannot be undone.');">
         <button type="submit" class="btn btn-secondary" style="color:var(--red); border-color:var(--red);">Delete Student</button>

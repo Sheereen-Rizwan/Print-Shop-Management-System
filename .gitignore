@@ -218,3 +218,5 @@ __marimo__/
 .streamlit/secrets.toml
 
 database.db
+start_shop.bat
+backup_database.bat
